@@ -19,17 +19,10 @@ public class Pasajero extends Thread {
         this.terminalAsignada = vuelo.getTerminal();
     }
 
-    private boolean tieneTiempoAntesDeEmbarque() {
-    // Lógica simple: 70% de chance de tener tiempo
-    return Math.random() < 0.7;
-}
-
     public void run() {
         try {
             //tiempo aleatorio para que no entren todos los pasajeros cuando abre el aeropuerto
             Thread.sleep(random.nextInt(1000, 30000));
-
-
 
             
             // Después de llegar a la terminal
@@ -52,6 +45,20 @@ public class Pasajero extends Thread {
             }
         } catch (Exception e) {
         }
+    }
+
+    
+    private boolean tieneTiempoAntesDeEmbarque() {
+        // 70% de chance de tener tiempo
+        return Math.random() < 0.7;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public Terminal getTerminalAsignada(){
+        return terminalAsignada;
     }
 
 }

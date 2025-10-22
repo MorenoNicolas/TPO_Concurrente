@@ -3,13 +3,13 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class Terminal {
 
-    private String nombre;
+    private char nombre;
     private int inicioPuestos;
     private int finPuestos;
     private ConcurrentLinkedQueue<String> salaEmbarque;
     private FreeShop freeShop;
 
-    public Terminal(String nombre, int inicio, int fin) {
+    public Terminal(char nombre, int inicio, int fin) {
         this.nombre = nombre;
         this.inicioPuestos = inicio;
         this.finPuestos = fin;
@@ -25,7 +25,7 @@ public class Terminal {
         return puesto >= inicioPuestos && puesto <= finPuestos;
     }
 
-    public String getNombre() {
+    public char getNombre() {
         return nombre;
     }
 

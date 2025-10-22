@@ -1,11 +1,11 @@
 import java.util.concurrent.Semaphore;
 
 public class FreeShop {
-    private String terminal;
+    private char terminal;
     private Semaphore capacidad;   
     private Semaphore cajas;       
 
-    public FreeShop(String terminal, int capacidadMaxima) {
+    public FreeShop(char terminal, int capacidadMaxima) {
         this.terminal = terminal;
         this.capacidad = new Semaphore(capacidadMaxima); 
         this.cajas = new Semaphore(2); // 2 cajas disponibles
