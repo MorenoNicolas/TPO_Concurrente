@@ -40,13 +40,14 @@ public Vuelo(String aerolinea, Terminal terminal, int[] puestosEmbarque, int hor
     // Metodo para Pasajero
     public void embarcarEsperarDespegue(String pasajero, int puestoEmbarque) {
         try {
-            System.out.println(pasajero + " abordó el avión de " + aerolinea + " en el Puesto de Embarque " + puestoEmbarque);
+            System.out.println(pasajero + " abordó el avión de " + aerolinea + " en el Puesto de Embarque oooooooooooooooooo " + puestoEmbarque);
             latchEmbarque.countDown();
+            System.out.println("\u001B[31m" + cantidadPasajeros  + "\u001B[0m" + aerolinea);
             latchEmbarque.await();
             synchronized (this) {
                 if (!yaDespego) {
                     yaDespego = true;
-                    System.out.println("Todos los pasajeros abordaron el avión. El Vuelo de " + aerolinea + " ha despegado");
+                    System.out.println("Todos los pasajeros abordaron el avión. El Vuelo de " + aerolinea + " ha despegado ppppppppppppppppppp");
                 }
             }
         } catch (Exception e) {

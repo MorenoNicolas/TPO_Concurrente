@@ -6,7 +6,7 @@ public class Main {
     private static final int PUESTOS_POR_TERMINAL = 6;
     private static final int CAP_TREN = 5;
     private static final int CAP_FREESHOP = 8;
-    private static final int TOTAL_PASAJEROS = 20; 
+    private static final int TOTAL_PASAJEROS = 10; 
     private static final String[] NOMBRES_AEROLINEAS = {
         "LATAM", "Iberia", "Lufthansa", "United Airlines"
     };
@@ -87,7 +87,7 @@ public class Main {
         for (int i = 0; i < NOMBRES_AEROLINEAS.length; i++) {
             Terminal t = terminales[rng.nextInt(terminales.length)];
             int[] puestosEmb = new int[7];
-            int hora = rng.nextInt(6, 23);
+            int hora = rng.nextInt(17) + 6;
             array[i] = new Vuelo(NOMBRES_AEROLINEAS[i], t, puestosEmb, hora);
             System.out.println("Vuelo " + (i + 1) + ": " + NOMBRES_AEROLINEAS[i]);
             System.out.println(" Terminal: " + t.getNombre());
@@ -99,18 +99,26 @@ public class Main {
     }
 
     private static void generarPasajeros(Aeropuerto aeropuerto, Tiempo tiempo) {
-        for (int i = 1; i <= TOTAL_PASAJEROS; i++) {
+        // Lista temporal para guardar los hilos antes de arrancarlos
+        Pasajero[] pasajerosThreads = new Pasajero[TOTAL_PASAJEROS];
+
+        // 1. Crear pasajeros y registrar reservas
+        for (int i = 0; i < TOTAL_PASAJEROS; i++) {
             Vuelo v = vuelos[rng.nextInt(vuelos.length)];
             v.registrarReserva();
-            Pasajero p = new Pasajero("Pasajero-" + i, aeropuerto, v, tiempo);
-            System.out.println(p.getName() + " con reserva en " + v.getAerolinea());
-            p.start();
+            pasajerosThreads[i] = new Pasajero("Pasajero-" + (i+1), aeropuerto, v, tiempo);
         }
-        System.out.println("-------------------------------------------------");
+
+        // 2. Inicializar el Latch en los vuelos (AHORA es seguro porque ya están todos contados)
         for (Vuelo v : vuelos) {
             v.inicializarCountDownLatch();
         }
         System.out.println("Todos los CountDownLatch inicializados.");
+
+        // 3. Iniciar los hilos de los pasajeros
+        for (Pasajero p : pasajerosThreads) {
+            p.start();
+        }
         System.out.println("-------------------------------------------------");
     }
 }

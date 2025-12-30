@@ -22,8 +22,32 @@ public class Pasajero extends Thread {
     public void run() {
         try {
             //tiempo aleatorio para que no entren todos los pasajeros cuando abre el aeropuerto
-            Thread.sleep(random.nextInt(1000, 30000));
+            Thread.sleep(random.nextInt(900) + 1000);
 
+            aeropuerto.entrarAeropuerto(nombre);
+            // Simula el tiempo que tarda el pasajero en llegar al puesto de informes luego de entrar al aeropuerto
+            Thread.sleep(random.nextInt(2501) + 500);
+
+            String aerolinea = vuelo.getAerolinea();
+            PuestoAtencion puestoAtencion = aeropuerto.derivarAPuestoAtencion(nombre, aerolinea);
+
+            // Simula el tiempo que tarda el pasajero en llegar al puesto de atencion luego de las indicaciones
+            Thread.sleep(random.nextInt(2501) + 500);
+            puestoAtencion.ingresarPuestoAtencion(nombre);
+            puestoAtencion.realizarCheckIn(nombre);
+            // Simula el tiempo que tarda el pasajero en realizar el check-in de su vuelo
+            Thread.sleep(random.nextInt(3001) + 2000);
+            int puestoEmbarque = puestoAtencion.salirPuestoAtencion(nombre, vuelo);
+
+            Terminal terminal = vuelo.getTerminal();
+            Tren tren = aeropuerto.obtenerTren();
+
+            // Simula el tiempo que tarda el pasajero en llegar al tren luego de salir del puesto de atencion
+            Thread.sleep(random.nextInt(2501) + 500);
+            tren.subirTren(this);
+            tren.bajarTren(terminalAsignada);
+
+            int horaSalida = vuelo.getHoraSalida();
             
             // Después de llegar a la terminal
             if (tieneTiempoAntesDeEmbarque()) {
@@ -42,6 +66,9 @@ public class Pasajero extends Thread {
             } else {
                 // Se sienta directamente en la sala de embarque
                 terminalAsignada.esperarEnSala(nombre);
+
+                vuelo.embarcarEsperarDespegue(nombre, puestoEmbarque);
+
             }
         } catch (Exception e) {
         }
