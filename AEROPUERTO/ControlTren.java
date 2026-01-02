@@ -1,43 +1,29 @@
-
 public class ControlTren extends Thread {
 
-    public static final String MAGENTA = "\u001B[35m"; // colores para la salida por pantalla (mas legible)
-    public static final String RESET = "\u001B[0m"; // colores para la salida por pantalla (mas legible)
-
     private Tren tren;
-    private Terminal[] terminales;
+    private char[] terminales = {'A', 'B', 'C'};
 
-    public ControlTren(Tren tren, Terminal[] terminales) {
+    public ControlTren(Tren tren) {
         this.tren = tren;
-        this.terminales = terminales;
     }
 
     @Override
     public void run() {
-        try {
-            while (true) {
-                // espera que el tren esté lleno
-                tren.esperarLleno();
 
-                System.out.println("El tren inicia su recorrido...");
+        while (true) {
 
-                // recorre todas las terminales
-                for (int i = 0; i < terminales.length; i++) {
-                    System.out.println("El tren llegó a Terminal " + terminales[i].getNombre());
-                    tren.bajarTren(terminales[i]);
-                    Thread.sleep(500); // simula parada
+            tren.habilitarAcceso();      // Permite subir pasajeros
+            tren.iniciarRecorrido();     // Espera el tren 
+
+            for (char t : terminales) {
+                try {
+                    Thread.sleep(1000);  // Simula el viaje
+                } catch (InterruptedException e) {
                 }
-
-                // asegura que quedó vacío en la última terminal
-                if (!tren.estaVacio()) {
-                    System.out.println("El tren llegó a la última terminal pero aún quedan pasajeros.");
-                }
-
-                System.out.println("El tren regresa vacío al inicio.");
-                tren.finalizarRecorrido();
+                tren.viajarATerminal(t);
             }
-        } catch (InterruptedException e) {
-            System.out.println("ControlTren interrumpido.");
+
+            tren.finalizarRecorrido();
         }
     }
 }

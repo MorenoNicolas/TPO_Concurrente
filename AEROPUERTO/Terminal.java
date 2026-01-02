@@ -8,21 +8,22 @@ public class Terminal {
     private int finPuestos;
     private ConcurrentLinkedQueue<String> salaEmbarque;
     private FreeShop freeShop;
+    private int[] puestosEmbarque;
 
-    public Terminal(char nombre, int inicio, int fin) {
+    public Terminal(char nombre, int[] puestosEmbarque2, FreeShop freeShop2) {
         this.nombre = nombre;
-        this.inicioPuestos = inicio;
-        this.finPuestos = fin;
+        this.puestosEmbarque = puestosEmbarque2;
+        this.freeShop = freeShop2;
         this.salaEmbarque = new ConcurrentLinkedQueue<>();
     }
 
-    public void esperarEnSala(String pasajero) {
-        System.out.println(pasajero + " espera en la sala de embarque de Terminal " + nombre);
-        salaEmbarque.add(pasajero);
-    }
-
     public boolean perteneceAPuesto(int puesto) {
-        return puesto >= inicioPuestos && puesto <= finPuestos;
+        for (int p : puestosEmbarque) {
+            if (puesto == p) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public char getNombre() {
@@ -31,5 +32,9 @@ public class Terminal {
 
     public FreeShop getFreeShop(){
         return freeShop;
+    }
+
+    public int[] getPuestosEmbarque() {
+        return puestosEmbarque;
     }
 }

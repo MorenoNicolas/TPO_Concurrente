@@ -12,7 +12,7 @@ public class ControlTiempo extends Thread {
     public void run() {
         try {
             while (true) {
-                Thread.sleep(150); // medio minuto
+                Thread.sleep(50); // medio minuto
                 tiempo.avanzarMinuto();
 
                 if (!tiempo.estaAbierto()) {

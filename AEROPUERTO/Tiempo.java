@@ -16,18 +16,18 @@ public class Tiempo {
         return horaActual + 3 < horaSalida;
     }
 
-    // // Metodo para Pasajero
-    // public synchronized void esperarLlamadoEmbarque(String pasajero, int horaSalida, Vuelo vuelo) {
-    //     try {
-    //         System.out.println(pasajero + " está esperando el llamado para embarcar");
-    //         while(horaActual < horaSalida) {
-    //             this.wait();
-    //         }
-    //         vuelo.notificarComienzoEmbarque();
-    //     } catch (Exception e) {
-    //         System.out.println("ERROR: Ocurrió un problema con el " + pasajero + " al esperar el llamado de embarque: " + e.getMessage());
-    //     }
-    // }
+    // Metodo para Pasajero
+    public synchronized void esperarEnSala(String pasajero, int horaSalida, Vuelo vuelo) {
+        try {
+            System.out.println(pasajero + " está esperando el llamado para embarcar");
+            while(horaActual < horaSalida) {
+                this.wait();
+            }
+            vuelo.notificarComienzoEmbarque();
+        } catch (Exception e) {
+            System.out.println("ERROR: Ocurrió un problema con el " + pasajero + " al esperar el llamado de embarque: " + e.getMessage());
+        }
+    }
 
     // Metodo para ControlTiempo
     public synchronized void avanzarHora() {

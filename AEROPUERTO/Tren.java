@@ -1,56 +1,90 @@
-
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.Semaphore;
 
 public class Tren {
+    public static final String MAGENTA = "\u001B[35m"; // colores para la salida por pantalla 
+    public static final String RESET = "\u001B[0m"; // colores para la salida por pantalla 
+
     private int capacidad;
-    private BlockingQueue<Pasajero> pasajeros; // pasajeros a bordo
-    private boolean enViaje = false;
+    private int pasajeros;
+    private char terminalActual;
+
+    private boolean enRecorrido;
+
+    // Semáforos
+    private Semaphore permisoSubir;
+    private Semaphore trenLleno;
+    private Semaphore mutex;
 
     public Tren(int capacidad) {
         this.capacidad = capacidad;
-        this.pasajeros = new LinkedBlockingQueue<>(capacidad);
+        this.pasajeros = 0;
+        this.enRecorrido = false;
+
+        this.permisoSubir = new Semaphore(0);
+        this.trenLleno = new Semaphore(0);
+        this.mutex = new Semaphore(1);
     }
 
-    // Pasajero sube al tren
-    public synchronized void subirTren(Pasajero p) throws InterruptedException {
-        while (enViaje || pasajeros.size() == capacidad) {
-            wait(); // espera si el tren está viajando o lleno
-        }
-        pasajeros.put(p);
-        System.out.println(p.getNombre() + " subió al tren.");
-        if (pasajeros.size() == capacidad) {
-            notifyAll(); // avisa al control que está lleno y inicia recorrido
-        }
-    }
+    // ================= PASAJERO =================
 
-    // ControlTren espera hasta que el tren esté lleno para arrancar
-    public synchronized void esperarLleno() throws InterruptedException {
-        while (pasajeros.size() < capacidad) {
-            wait();
-        }
-        enViaje = true;
-    }
+    public void subirTren(String pasajero, char terminal) {
+        try {
+            permisoSubir.acquire(); // Espera autorización
 
-    // Pasajeros que deben bajar en esta terminal
-    public synchronized void bajarTren(Terminal terminal) {
-        pasajeros.removeIf(p -> {
-            if (p.getTerminalAsignada() == terminal) {
-                System.out.println(p.getNombre() + " bajó en Terminal " + terminal.getNombre());
-                terminal.esperarEnSala(p.getNombre()); // lo manda a la sala de embarque
-                return true;
+            mutex.acquire();
+            pasajeros++;
+            System.out.println(pasajero + " subió al Tren con destino a la Terminal " 
+                    + terminal + ". " + pasajeros + "/" + capacidad);
+
+            if (pasajeros == capacidad) {
+                trenLleno.release(); // Avisar al chofer
             }
-            return false;
-        });
+            mutex.release();
+
+        } catch (InterruptedException e) {
+            System.out.println("ERROR al subir pasajero " + pasajero);
+        }
     }
 
-    // Al terminar recorrido
-    public synchronized void finalizarRecorrido() {
-        enViaje = false;
-        notifyAll(); // permite que nuevos pasajeros suban
+    public void bajarTren(String pasajero, char terminal) {
+        try {
+            synchronized (this) {
+                while (terminal != terminalActual) {
+                    this.wait();
+                }
+            }
+
+            mutex.acquire();
+            pasajeros--;
+            System.out.println(pasajero + " bajó en la Terminal " + terminal 
+                    + ". " + pasajeros + "/" + capacidad);
+            mutex.release();
+
+        } catch (Exception e) {
+            System.out.println("ERROR al bajar pasajero " + pasajero);
+        }
     }
 
-    public boolean estaVacio() {
-        return pasajeros.isEmpty();
+    // ================= CONTROL DEL TREN =================
+
+    public void habilitarAcceso() {
+        System.out.println(MAGENTA + "El Tren está habilitado para subir pasajeros" + RESET);
+        permisoSubir.release(capacidad); // Permite subir a todos
+    }
+
+    public void iniciarRecorrido() {
+            enRecorrido = true;
+            System.out.println(MAGENTA + "El Tren inició el recorrido"+ RESET);
+    }
+
+    public synchronized void viajarATerminal(char terminal) {
+        terminalActual = terminal;
+        System.out.println(MAGENTA + "El Tren llegó a la Terminal " + terminal + RESET);
+        this.notifyAll();
+    }
+
+    public void finalizarRecorrido() {
+        enRecorrido = false;
+        System.out.println(MAGENTA + "El Tren finalizó el recorrido y vuelve al inicio" + RESET);
     }
 }

@@ -1,4 +1,3 @@
-
 import java.util.Random;
 
 public class Pasajero extends Thread {
@@ -39,15 +38,13 @@ public class Pasajero extends Thread {
             Thread.sleep(random.nextInt(3001) + 2000);
             int puestoEmbarque = puestoAtencion.salirPuestoAtencion(nombre, vuelo);
 
-            Terminal terminal = vuelo.getTerminal();
-            Tren tren = aeropuerto.obtenerTren();
 
+            Tren tren = aeropuerto.obtenerTren();
             // Simula el tiempo que tarda el pasajero en llegar al tren luego de salir del puesto de atencion
             Thread.sleep(random.nextInt(2501) + 500);
-            tren.subirTren(this);
-            tren.bajarTren(terminalAsignada);
+            tren.subirTren(nombre, terminalAsignada.getNombre());
+            tren.bajarTren(nombre, terminalAsignada.getNombre());
 
-            int horaSalida = vuelo.getHoraSalida();
             
             // Después de llegar a la terminal
             if (tieneTiempoAntesDeEmbarque()) {
@@ -63,21 +60,20 @@ public class Pasajero extends Thread {
                 } catch (InterruptedException e) {
                     System.out.println(nombre + " no pudo entrar al FreeShop");
                 }
-            } else {
+            } 
                 // Se sienta directamente en la sala de embarque
-                terminalAsignada.esperarEnSala(nombre);
+                tiempo.esperarEnSala(nombre, vuelo.getHoraSalida(), vuelo);
 
                 vuelo.embarcarEsperarDespegue(nombre, puestoEmbarque);
-
-            }
+            
         } catch (Exception e) {
         }
     }
 
     
     private boolean tieneTiempoAntesDeEmbarque() {
-        // 70% de chance de tener tiempo
-        return Math.random() < 0.7;
+        // 50% de chance de tener tiempo
+        return Math.random() < 0.5;
     }
 
     public String getNombre() {

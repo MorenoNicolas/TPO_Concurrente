@@ -2,18 +2,18 @@ import java.util.Arrays;
 import java.util.Random;
 public class Main {
 
-    private static final int NUM_TERMINALES = 3;
-    private static final int PUESTOS_POR_TERMINAL = 6;
-    private static final int CAP_TREN = 5;
+    private static final int NUM_TERMINALES = 3;            //NO CAMBIAR
+    private static final int PUESTOS_POR_TERMINAL = 7;      //NO CAMBIAR
+    private static final int CAP_TREN = 5;                  //CAMBIAR CUANDO SE CAMBIA LOS PASAJEROS
     private static final int CAP_FREESHOP = 8;
-    private static final int TOTAL_PASAJEROS = 10; 
+    private static final int TOTAL_PASAJEROS = 1; 
     private static final String[] NOMBRES_AEROLINEAS = {
         "LATAM", "Iberia", "Lufthansa", "United Airlines"
     };
 
-    private static Terminal[] terminales;
-    private static PuestoAtencion[] puestos;
-    private static Vuelo[] vuelos;
+    private static Terminal[] terminales = new Terminal[NUM_TERMINALES];
+    private static PuestoAtencion[] puestos = new PuestoAtencion[NOMBRES_AEROLINEAS.length];
+    private static Vuelo[] vuelos = new Vuelo[NOMBRES_AEROLINEAS.length];
     private static Random rng = new Random();
 
     public static void main(String[] args) {
@@ -38,7 +38,7 @@ public class Main {
         }
 
         // Chofer del tren
-        ControlTren conductor = new ControlTren(tren, terminales);
+        ControlTren conductor = new ControlTren(tren);
 
         // Lanzar reloj y tren
         aeropuerto.iniciarJornada();
@@ -50,26 +50,27 @@ public class Main {
 
     }
 
-    private static Terminal[] setupTerminales() {
-        Terminal[] array = new Terminal[NUM_TERMINALES];
-        char letra = 'A';
-        int contadorPuestos = 1, inicioPuesto=1, finPuesto=7;
-
-        for (int i = 0; i < NUM_TERMINALES; i++) {
-            int[] puestosEmb = new int[PUESTOS_POR_TERMINAL];
-            for (int j = 0; j < PUESTOS_POR_TERMINAL; j++) {
-                puestosEmb[j] = contadorPuestos++;
+        public static Terminal[] setupTerminales() {
+        /* Metodo para crear las terminales del aeropuerto.
+        Cada una con su free shop y puestos de embarque correspondientes
+        (numerados en orden para facilitar la creacion) */ 
+        char letraTerminal = 'A';
+        int numeroPuerta = 1;
+        for (int i = 0; i < terminales.length; i++) {
+            int[] puestosEmbarque = new int[PUESTOS_POR_TERMINAL];
+            for (int j = 0; j < puestosEmbarque.length; j++) {
+                puestosEmbarque[j] = numeroPuerta;
+                numeroPuerta++;
             }
-            FreeShop free = new FreeShop(letra , CAP_FREESHOP);
-            array[i] = new Terminal(letra, inicioPuesto, finPuesto);
-            System.out.println("Terminal " + letra + " creada con puestos: " + Arrays.toString(puestosEmb));
-            letra++;
-            inicioPuesto += 7;
-            finPuesto +=7;
+            FreeShop freeShop = new FreeShop(letraTerminal, CAP_FREESHOP);
+            terminales[i] = new Terminal(letraTerminal, puestosEmbarque, freeShop);
+            System.out.println("Terminal " + letraTerminal + " creada con puestos: " + Arrays.toString(puestosEmbarque));
+            System.out.println("-------------------------------------------------");
+            letraTerminal++;
         }
-        System.out.println("-------------------------------------------------");
-        return array;
+        return terminales;
     }
+
 
     private static PuestoAtencion[] setupPuestosAtencion() {
         PuestoAtencion[] array = new PuestoAtencion[NOMBRES_AEROLINEAS.length];
@@ -91,7 +92,6 @@ public class Main {
             array[i] = new Vuelo(NOMBRES_AEROLINEAS[i], t, puestosEmb, hora);
             System.out.println("Vuelo " + (i + 1) + ": " + NOMBRES_AEROLINEAS[i]);
             System.out.println(" Terminal: " + t.getNombre());
-            System.out.println(" Puestos disponibles: " + Arrays.toString(puestosEmb));
             System.out.println(" Hora salida: " + hora + ":00");
             System.out.println("-------------------------------------------------");
         }
@@ -109,7 +109,7 @@ public class Main {
             pasajerosThreads[i] = new Pasajero("Pasajero-" + (i+1), aeropuerto, v, tiempo);
         }
 
-        // 2. Inicializar el Latch en los vuelos (AHORA es seguro porque ya están todos contados)
+        // 2. Inicializar el Latch en los vuelos
         for (Vuelo v : vuelos) {
             v.inicializarCountDownLatch();
         }

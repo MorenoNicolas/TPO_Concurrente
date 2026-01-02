@@ -1,4 +1,3 @@
-
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 
@@ -40,14 +39,13 @@ public Vuelo(String aerolinea, Terminal terminal, int[] puestosEmbarque, int hor
     // Metodo para Pasajero
     public void embarcarEsperarDespegue(String pasajero, int puestoEmbarque) {
         try {
-            System.out.println(pasajero + " abordó el avión de " + aerolinea + " en el Puesto de Embarque oooooooooooooooooo " + puestoEmbarque);
+            System.out.println(pasajero + " abordó el avión de " + aerolinea + " en el Puesto de Embarque " + puestoEmbarque);
             latchEmbarque.countDown();
-            System.out.println("\u001B[31m" + cantidadPasajeros  + "\u001B[0m" + aerolinea);
             latchEmbarque.await();
             synchronized (this) {
-                if (!yaDespego) {
+                if (!yaDespego && latchEmbarque.getCount() == 0) {
                     yaDespego = true;
-                    System.out.println("Todos los pasajeros abordaron el avión. El Vuelo de " + aerolinea + " ha despegado ppppppppppppppppppp");
+                    System.out.println("\u001B[31m" + "Todos los pasajeros abordaron el avión. El Vuelo de " + aerolinea + " ha despegado " + "\u001B[0m");
                 }
             }
         } catch (Exception e) {
@@ -56,15 +54,18 @@ public Vuelo(String aerolinea, Terminal terminal, int[] puestosEmbarque, int hor
     }
 
     public int asignarPuestoEmbarque() {
-        int puesto = (int) (Math.random() * 20) + 1; // 1 a 20
-        if (puesto <= 7) {
-            return puesto;              // Terminal A
-        } else if (puesto <= 15) {
-            return puesto;              // Terminal B
-        } else {
-            return puesto;              // Terminal C
+        char t = terminal.getNombre();
+        int min, max;
+        if (t == 'A') {
+            min = 1; max = 7;        // Terminal A
+        } else if (t == 'B') {
+            min = 8; max = 14;       // Terminal B
+        } else{
+            min = 15; max = 21;      // Terminal C
         }
+        return min + random.nextInt(max - min + 1);
     }
+
     public Terminal getTerminal() {
         return terminal;
 
