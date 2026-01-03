@@ -20,40 +20,42 @@ public class Pasajero extends Thread {
 
     public void run() {
         try {
-            //tiempo aleatorio para que no entren todos los pasajeros cuando abre el aeropuerto
-            Thread.sleep(random.nextInt(900) + 1000);
+            // Tiempo aleatorio para llegada escalonada
+            Thread.sleep(random.nextInt(1500));
 
             aeropuerto.entrarAeropuerto(nombre);
-            // Simula el tiempo que tarda el pasajero en llegar al puesto de informes luego de entrar al aeropuerto
-            Thread.sleep(random.nextInt(2501) + 500);
+            Thread.sleep(random.nextInt(1000));
 
             String aerolinea = vuelo.getAerolinea();
             PuestoAtencion puestoAtencion = aeropuerto.derivarAPuestoAtencion(nombre, aerolinea);
 
-            // Simula el tiempo que tarda el pasajero en llegar al puesto de atencion luego de las indicaciones
-            Thread.sleep(random.nextInt(2501) + 500);
+            Thread.sleep(random.nextInt(1000));
             puestoAtencion.ingresarPuestoAtencion(nombre);
             puestoAtencion.realizarCheckIn(nombre);
-            // Simula el tiempo que tarda el pasajero en realizar el check-in de su vuelo
-            Thread.sleep(random.nextInt(3001) + 2000);
+            
+            Thread.sleep(random.nextInt(1000));
             int puestoEmbarque = puestoAtencion.salirPuestoAtencion(nombre, vuelo);
 
-
+            // === LÓGICA DEL TREN ===
             Tren tren = aeropuerto.obtenerTren();
-            // Simula el tiempo que tarda el pasajero en llegar al tren luego de salir del puesto de atencion
-            Thread.sleep(random.nextInt(2501) + 500);
-            tren.subirTren(nombre, terminalAsignada.getNombre());
-            tren.bajarTren(nombre, terminalAsignada.getNombre());
+            
+            // Asumimos que el nombre de la terminal es "A", "B" o "C". Obtenemos el char.
+            char charTerminal = terminalAsignada.getNombre();
+            
+            // Intenta subir. Si el tren no está, se bloqueará aquí hasta el próximo ciclo.
+            tren.subirTren(nombre, charTerminal);
+            
+            // Se bloquea hasta que el tren llegue a su terminal específica
+            tren.bajarTren(nombre, charTerminal);
+            // =======================
 
             
-            // Después de llegar a la terminal
+            // Después de llegar a la terminal (Lógica de FreeShop)
             if (tieneTiempoAntesDeEmbarque()) {
                 try {
                     terminalAsignada.getFreeShop().ingresar(nombre);
-
-                    // Simula que el pasajero mira siempre y a veces compra
                     terminalAsignada.getFreeShop().mirarProductos(nombre);
-                    if (Math.random() > 0.5) { // 50% probabilidad de comprar
+                    if (Math.random() > 0.5) { 
                         terminalAsignada.getFreeShop().comprar(nombre);
                     }
                     terminalAsignada.getFreeShop().salir(nombre);
@@ -61,18 +63,17 @@ public class Pasajero extends Thread {
                     System.out.println(nombre + " no pudo entrar al FreeShop");
                 }
             } 
-                // Se sienta directamente en la sala de embarque
-                tiempo.esperarEnSala(nombre, vuelo.getHoraSalida(), vuelo);
-
-                vuelo.embarcarEsperarDespegue(nombre, puestoEmbarque);
+            
+            // Se sienta en la sala de embarque
+            tiempo.esperarEnSala(nombre, vuelo.getHoraSalida(), vuelo);
+            vuelo.embarcarEsperarDespegue(nombre, puestoEmbarque);
             
         } catch (Exception e) {
+            System.out.println("Error en pasajero " + nombre + ": " + e.getMessage());
         }
     }
 
-    
     private boolean tieneTiempoAntesDeEmbarque() {
-        // 50% de chance de tener tiempo
         return Math.random() < 0.5;
     }
 
@@ -83,5 +84,4 @@ public class Pasajero extends Thread {
     public Terminal getTerminalAsignada(){
         return terminalAsignada;
     }
-
 }

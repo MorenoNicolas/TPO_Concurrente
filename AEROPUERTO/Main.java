@@ -6,7 +6,7 @@ public class Main {
     private static final int PUESTOS_POR_TERMINAL = 7;      //NO CAMBIAR
     private static final int CAP_TREN = 5;                  //CAMBIAR CUANDO SE CAMBIA LOS PASAJEROS
     private static final int CAP_FREESHOP = 8;
-    private static final int TOTAL_PASAJEROS = 1; 
+    private static final int TOTAL_PASAJEROS = 20; 
     private static final String[] NOMBRES_AEROLINEAS = {
         "LATAM", "Iberia", "Lufthansa", "United Airlines"
     };

@@ -1,44 +1,38 @@
 import java.util.concurrent.Semaphore;
 
 public class Tren {
-    public static final String MAGENTA = "\u001B[35m"; // colores para la salida por pantalla 
-    public static final String RESET = "\u001B[0m"; // colores para la salida por pantalla 
+    public static final String MAGENTA = "\u001B[35m"; 
+    public static final String RESET = "\u001B[0m"; 
 
     private int capacidad;
     private int pasajeros;
     private char terminalActual;
 
-    private boolean enRecorrido;
-
     // Semáforos
-    private Semaphore permisoSubir;
-    private Semaphore trenLleno;
-    private Semaphore mutex;
+    private Semaphore permisoSubir; // Controla la capacidad y el estado de puertas abiertas
+    private Semaphore mutex;        // Exclusión mutua para variables compartidas
 
     public Tren(int capacidad) {
         this.capacidad = capacidad;
         this.pasajeros = 0;
-        this.enRecorrido = false;
+        this.terminalActual = ' '; // Ninguna terminal al inicio
 
+        // Iniciamos en 0, el ControlTren dará los permisos cuando abra puertas
         this.permisoSubir = new Semaphore(0);
-        this.trenLleno = new Semaphore(0);
         this.mutex = new Semaphore(1);
     }
 
     // ================= PASAJERO =================
 
-    public void subirTren(String pasajero, char terminal) {
+    public void subirTren(String pasajero, char terminalDestino) {
         try {
-            permisoSubir.acquire(); // Espera autorización
+            // El pasajero se bloquea aquí si el tren no está en estación inicial o está lleno
+            permisoSubir.acquire(); 
 
             mutex.acquire();
             pasajeros++;
-            System.out.println(pasajero + " subió al Tren con destino a la Terminal " 
-                    + terminal + ". " + pasajeros + "/" + capacidad);
-
-            if (pasajeros == capacidad) {
-                trenLleno.release(); // Avisar al chofer
-            }
+            System.out.println(pasajero + " subió al Tren con destino a Terminal " 
+                    + terminalDestino + ". Pasajeros: " + pasajeros + "/" + capacidad);
             mutex.release();
 
         } catch (InterruptedException e) {
@@ -46,18 +40,19 @@ public class Tren {
         }
     }
 
-    public void bajarTren(String pasajero, char terminal) {
+    public void bajarTren(String pasajero, char terminalDestino) {
         try {
             synchronized (this) {
-                while (terminal != terminalActual) {
+                // Mientras no estemos en la terminal del pasajero, espera
+                while (terminalDestino != terminalActual) {
                     this.wait();
                 }
             }
 
             mutex.acquire();
             pasajeros--;
-            System.out.println(pasajero + " bajó en la Terminal " + terminal 
-                    + ". " + pasajeros + "/" + capacidad);
+            System.out.println(pasajero + " bajó en la Terminal " + terminalDestino 
+                    + ". Pasajeros restantes: " + pasajeros);
             mutex.release();
 
         } catch (Exception e) {
@@ -68,23 +63,33 @@ public class Tren {
     // ================= CONTROL DEL TREN =================
 
     public void habilitarAcceso() {
-        System.out.println(MAGENTA + "El Tren está habilitado para subir pasajeros" + RESET);
-        permisoSubir.release(capacidad); // Permite subir a todos
+        terminalActual = ' '; // Reseteamos terminal
+        System.out.println(MAGENTA + "=== EL TREN ABRE PUERTAS (Inicio de recorrido) ===" + RESET);
+        
+        // Drenamos permisos viejos por seguridad y damos permisos nuevos según capacidad
+        permisoSubir.drainPermits(); 
+        permisoSubir.release(capacidad); 
+    }
+
+    public void cerrarPuertas() {
+        System.out.println(MAGENTA + "=== EL TREN CIERRA PUERTAS ===" + RESET);
+        // Quitamos todos los permisos restantes para que nadie más suba
+        permisoSubir.drainPermits();
     }
 
     public void iniciarRecorrido() {
-            enRecorrido = true;
-            System.out.println(MAGENTA + "El Tren inició el recorrido"+ RESET);
+        System.out.println(MAGENTA + "El Tren inició el recorrido hacia las terminales..."+ RESET);
     }
 
     public synchronized void viajarATerminal(char terminal) {
         terminalActual = terminal;
-        System.out.println(MAGENTA + "El Tren llegó a la Terminal " + terminal + RESET);
+        System.out.println(MAGENTA + ">> El Tren llegó a la Terminal " + terminal + RESET);
+        // Notificamos a todos los pasajeros que están esperando (wait) en bajarTren
         this.notifyAll();
     }
 
     public void finalizarRecorrido() {
-        enRecorrido = false;
+        terminalActual = ' ';
         System.out.println(MAGENTA + "El Tren finalizó el recorrido y vuelve al inicio" + RESET);
     }
 }
