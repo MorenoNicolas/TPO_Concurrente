@@ -4,9 +4,10 @@ public class Main {
 
     private static final int NUM_TERMINALES = 3;            //NO CAMBIAR
     private static final int PUESTOS_POR_TERMINAL = 7;      //NO CAMBIAR
-    private static final int CAP_TREN = 5;                  //CAMBIAR CUANDO SE CAMBIA LOS PASAJEROS
+    private static final int CAP_TREN = 5;                  
     private static final int CAP_FREESHOP = 8;
-    private static final int TOTAL_PASAJEROS = 20; 
+    private static final int TOTAL_PASAJEROS = 3; 
+    private static final int CAP_PUESTO_ATENCION = 3;
     private static final String[] NOMBRES_AEROLINEAS = {
         "LATAM", "Iberia", "Lufthansa", "United Airlines"
     };
@@ -74,9 +75,8 @@ public class Main {
 
     private static PuestoAtencion[] setupPuestosAtencion() {
         PuestoAtencion[] array = new PuestoAtencion[NOMBRES_AEROLINEAS.length];
-        int maxCapacidad = 3;
         for (int i = 0; i < NOMBRES_AEROLINEAS.length; i++) {
-            array[i] = new PuestoAtencion(NOMBRES_AEROLINEAS[i], maxCapacidad);
+            array[i] = new PuestoAtencion(NOMBRES_AEROLINEAS[i], CAP_PUESTO_ATENCION);
             System.out.println("Puesto de atención creado para " + NOMBRES_AEROLINEAS[i]);
         }
         System.out.println("-------------------------------------------------");
@@ -87,7 +87,7 @@ public class Main {
         Vuelo[] array = new Vuelo[NOMBRES_AEROLINEAS.length];
         for (int i = 0; i < NOMBRES_AEROLINEAS.length; i++) {
             Terminal t = terminales[rng.nextInt(terminales.length)];
-            int[] puestosEmb = new int[7];
+            int[] puestosEmb = new int[PUESTOS_POR_TERMINAL];
             int hora = rng.nextInt(17) + 6;
             array[i] = new Vuelo(NOMBRES_AEROLINEAS[i], t, puestosEmb, hora);
             System.out.println("Vuelo " + (i + 1) + ": " + NOMBRES_AEROLINEAS[i]);
