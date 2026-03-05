@@ -4,9 +4,9 @@ public class Main {
 
     private static final int NUM_TERMINALES = 3;            //NO CAMBIAR
     private static final int PUESTOS_POR_TERMINAL = 7;      //NO CAMBIAR
-    private static final int CAP_TREN = 5;                  
+    private static final int CAP_TREN = 4;                  
     private static final int CAP_FREESHOP = 8;
-    private static final int TOTAL_PASAJEROS = 3; 
+    private static final int TOTAL_PASAJEROS = 5; 
     private static final int CAP_PUESTO_ATENCION = 3;
     private static final String[] NOMBRES_AEROLINEAS = {
         "LATAM", "Iberia", "Lufthansa", "United Airlines"
@@ -54,7 +54,7 @@ public class Main {
         public static Terminal[] setupTerminales() {
         /* Metodo para crear las terminales del aeropuerto.
         Cada una con su free shop y puestos de embarque correspondientes
-        (numerados en orden para facilitar la creacion) */ 
+         */ 
         char letraTerminal = 'A';
         int numeroPuerta = 1;
         for (int i = 0; i < terminales.length; i++) {

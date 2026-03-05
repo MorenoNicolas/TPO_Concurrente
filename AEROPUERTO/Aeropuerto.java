@@ -13,7 +13,7 @@ public class Aeropuerto {
     public synchronized void entrarAeropuerto(String pasajero) {
         try {
             while (!abierto) {
-                wait(); // espera a que abra
+                wait(); 
             }
             System.out.println(pasajero + " ingresó al aeropuerto.");
         } catch (InterruptedException e) {
@@ -37,14 +37,14 @@ public class Aeropuerto {
     // Abrir aeropuerto (llamado desde ControlTiempo)
     public synchronized void iniciarJornada() {
         abierto = true;
-        System.out.println("Son las 6:00 → El aeropuerto abrió sus puertas.\n");
+        System.out.println("Son las 6:00 -> El aeropuerto abrió sus puertas.\n");
         notifyAll();
     }
 
-    // Cerrar aeropuerto (llamado desde reloj)
+    // Cerrar aeropuerto (llamado desde ControlTiempo)
     public synchronized void finalizarJornada() {
         abierto = false;
-        System.out.println("Son las 22:00 → El aeropuerto cerró su atención.\n");
+        System.out.println("Son las 22:00 -> El aeropuerto cerró su atención.\n");
         notifyAll();
     }
 

@@ -1,8 +1,8 @@
 import java.util.concurrent.Semaphore;
 
 public class Tren {
-    public static final String MAGENTA = "\u001B[35m"; 
-    public static final String RESET = "\u001B[0m"; 
+    public static final String MAGENTA = "\u001B[35m";
+    public static final String RESET = "\u001B[0m";
 
     private int capacidad;
     private int pasajeros;
@@ -10,7 +10,7 @@ public class Tren {
 
     // Semáforos
     private Semaphore permisoSubir; // Controla la capacidad y el estado de puertas abiertas
-    private Semaphore mutex;        // Exclusión mutua para variables compartidas
+    private Semaphore mutex; // Exclusión mutua para variables compartidas
 
     public Tren(int capacidad) {
         this.capacidad = capacidad;
@@ -26,12 +26,13 @@ public class Tren {
 
     public void subirTren(String pasajero, char terminalDestino) {
         try {
-            // El pasajero se bloquea aquí si el tren no está en estación inicial o está lleno
-            permisoSubir.acquire(); 
+            // El pasajero se bloquea aquí si el tren no está en estación inicial o está
+            // lleno
+            permisoSubir.acquire();
 
             mutex.acquire();
             pasajeros++;
-            System.out.println(pasajero + " subió al Tren con destino a Terminal " 
+            System.out.println(pasajero + " subió al Tren con destino a Terminal "
                     + terminalDestino + ". Pasajeros: " + pasajeros + "/" + capacidad);
             mutex.release();
 
@@ -51,7 +52,7 @@ public class Tren {
 
             mutex.acquire();
             pasajeros--;
-            System.out.println(pasajero + " bajó en la Terminal " + terminalDestino 
+            System.out.println(pasajero + " bajó en la Terminal " + terminalDestino
                     + ". Pasajeros restantes: " + pasajeros);
             mutex.release();
 
@@ -65,10 +66,11 @@ public class Tren {
     public void habilitarAcceso() {
         terminalActual = ' '; // Reseteamos terminal
         System.out.println(MAGENTA + "=== EL TREN ABRE PUERTAS (Inicio de recorrido) ===" + RESET);
-        
-        // Drenamos permisos viejos por seguridad y damos permisos nuevos según capacidad
-        permisoSubir.drainPermits(); 
-        permisoSubir.release(capacidad); 
+
+        // Drenamos permisos viejos por seguridad y damos permisos nuevos según
+        // capacidad
+        permisoSubir.drainPermits();
+        permisoSubir.release(capacidad);
     }
 
     public void cerrarPuertas() {
@@ -78,7 +80,7 @@ public class Tren {
     }
 
     public void iniciarRecorrido() {
-        System.out.println(MAGENTA + "El Tren inició el recorrido hacia las terminales..."+ RESET);
+        System.out.println(MAGENTA + "El Tren inició el recorrido hacia las terminales..." + RESET);
     }
 
     public synchronized void viajarATerminal(char terminal) {

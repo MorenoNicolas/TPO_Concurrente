@@ -45,7 +45,7 @@ public Vuelo(String aerolinea, Terminal terminal, int[] puestosEmbarque, int hor
             synchronized (this) {
                 if (!yaDespego && latchEmbarque.getCount() == 0) {
                     yaDespego = true;
-                    System.out.println("\u001B[31m" + "Todos los pasajeros abordaron el avión. El Vuelo de " + aerolinea + " ha despegado " + "\u001B[0m");
+                    System.out.println("\u001B[31m" + "El Vuelo de " + aerolinea + " ha despegado " + "\u001B[0m");
                 }
             }
         } catch (Exception e) {

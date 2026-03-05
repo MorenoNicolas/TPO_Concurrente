@@ -14,7 +14,7 @@ public class ControlTren extends Thread {
                 // 1. Llegada al inicio y carga de pasajeros
                 tren.habilitarAcceso();      
                 
-                // Tiempo de espera para que los pasajeros suban
+                
                 Thread.sleep(3000); 
 
                 // 2. Cierre y salida
@@ -23,13 +23,13 @@ public class ControlTren extends Thread {
 
                 // 3. Recorrido por las terminales
                 for (char t : terminales) {
-                    // Simula el viaje entre estaciones
+                    
                     Thread.sleep(1500);  
                     
-                    // Llega a la terminal y avisa a pasajeros
+                    
                     tren.viajarATerminal(t);
                     
-                    // Tiempo de espera en la estación para que bajen
+                    
                     Thread.sleep(1000); 
                 }
 

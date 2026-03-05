@@ -29,7 +29,7 @@ public class PuestoAtencion {
         accesoPuesto.lock();
         try {
             if (ocupacion == capacidad) {
-                // puesto lleno → se queda en el hall
+                // puesto lleno -> se queda en el hall
                 hall.add(pasajero);
                 System.out.println(pasajero + " espera en el hall para " + aerolinea);
                 esperaGuardia.signal(); // avisa al guardia

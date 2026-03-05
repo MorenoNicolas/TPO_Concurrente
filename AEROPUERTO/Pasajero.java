@@ -36,21 +36,20 @@ public class Pasajero extends Thread {
             Thread.sleep(random.nextInt(1000));
             int puestoEmbarque = puestoAtencion.salirPuestoAtencion(nombre, vuelo);
 
-            // === LÓGICA DEL TREN ===
+            
             Tren tren = aeropuerto.obtenerTren();
             
-            // Asumimos que el nombre de la terminal es "A", "B" o "C". Obtenemos el char.
+            
             char charTerminal = terminalAsignada.getNombre();
             
             // Intenta subir. Si el tren no está, se bloqueará aquí hasta el próximo ciclo.
             tren.subirTren(nombre, charTerminal);
             
-            // Se bloquea hasta que el tren llegue a su terminal específica
-            tren.bajarTren(nombre, charTerminal);
-            // =======================
-
             
-            // Después de llegar a la terminal (Lógica de FreeShop)
+            tren.bajarTren(nombre, charTerminal);
+            
+            
+            // Después de llegar a la terminal 
             if (tieneTiempoAntesDeEmbarque()) {
                 try {
                     terminalAsignada.getFreeShop().ingresar(nombre);
