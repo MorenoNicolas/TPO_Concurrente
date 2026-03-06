@@ -1,26 +1,20 @@
 public class Tren {
     public static final String MAGENTA = "\u001B[35m";
-    public static final String RESET   = "\u001B[0m";
+    public static final String RESET = "\u001B[0m";
 
     private final int capacidad;
-    private int  pasajeros;
+    private int pasajeros;
     private char terminalActual;
     private boolean puertasAbiertas; // true mientras el tren acepta pasajeros
 
     public Tren(int capacidad) {
-        this.capacidad      = capacidad;
-        this.pasajeros      = 0;
+        this.capacidad = capacidad;
+        this.pasajeros = 0;
         this.terminalActual = ' ';
         this.puertasAbiertas = false;
     }
 
     // ================= PASAJERO =================
-
-    /**
-     * El pasajero espera hasta que las puertas estén abiertas Y haya lugar.
-     * Una vez que sube, libera un "lugar" notificando por si otro pasajero
-     * estaba esperando (no aplica aquí, pero es correcto para el monitor).
-     */
     public synchronized void subirTren(String pasajero, char terminalDestino)
             throws InterruptedException {
         // Espera condición: puertas abiertas Y hay capacidad
@@ -32,10 +26,6 @@ public class Tren {
                 + terminalDestino + ". Pasajeros: " + pasajeros + "/" + capacidad);
     }
 
-    /**
-     * El pasajero espera dentro del tren hasta llegar a su terminal.
-     * Al bajar decrementa el contador y notifica (puede liberar lugar para subir).
-     */
     public synchronized void bajarTren(String pasajero, char terminalDestino)
             throws InterruptedException {
         // Espera condición: el tren está en la terminal del pasajero
@@ -50,19 +40,13 @@ public class Tren {
 
     // ================= CONTROL DEL TREN =================
 
-    /**
-     * Abre puertas al inicio del recorrido: habilita el boarding.
-     */
     public synchronized void habilitarAcceso() {
-        terminalActual  = ' ';
+        terminalActual = ' ';
         puertasAbiertas = true;
         System.out.println(MAGENTA + "=== EL TREN ABRE PUERTAS (Inicio de recorrido) ===" + RESET);
         this.notifyAll(); // despierta pasajeros que esperaban para subir
     }
 
-    /**
-     * Cierra puertas: ningún pasajero adicional puede subir.
-     */
     public synchronized void cerrarPuertas() {
         puertasAbiertas = false;
         System.out.println(MAGENTA + "=== EL TREN CIERRA PUERTAS ===" + RESET);
@@ -73,9 +57,6 @@ public class Tren {
         System.out.println(MAGENTA + "El Tren inició el recorrido hacia las terminales..." + RESET);
     }
 
-    /**
-     * El tren llega a una terminal: notifica a los pasajeros con ese destino.
-     */
     public synchronized void viajarATerminal(char terminal) {
         terminalActual = terminal;
         System.out.println(MAGENTA + ">> El Tren llegó a la Terminal " + terminal + RESET);
@@ -83,7 +64,7 @@ public class Tren {
     }
 
     public synchronized void finalizarRecorrido() {
-        terminalActual  = ' ';
+        terminalActual = ' ';
         puertasAbiertas = false;
         System.out.println(MAGENTA + "El Tren finalizó el recorrido y vuelve al inicio" + RESET);
     }
