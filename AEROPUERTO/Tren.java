@@ -1,97 +1,90 @@
-import java.util.concurrent.Semaphore;
-
 public class Tren {
     public static final String MAGENTA = "\u001B[35m";
-    public static final String RESET = "\u001B[0m";
+    public static final String RESET   = "\u001B[0m";
 
-    private int capacidad;
-    private int pasajeros;
+    private final int capacidad;
+    private int  pasajeros;
     private char terminalActual;
-
-    // Semáforos
-    private Semaphore permisoSubir; // Controla la capacidad y el estado de puertas abiertas
-    private Semaphore mutex; // Exclusión mutua para variables compartidas
+    private boolean puertasAbiertas; // true mientras el tren acepta pasajeros
 
     public Tren(int capacidad) {
-        this.capacidad = capacidad;
-        this.pasajeros = 0;
-        this.terminalActual = ' '; // Ninguna terminal al inicio
-
-        // Iniciamos en 0, el ControlTren dará los permisos cuando abra puertas
-        this.permisoSubir = new Semaphore(0);
-        this.mutex = new Semaphore(1);
+        this.capacidad      = capacidad;
+        this.pasajeros      = 0;
+        this.terminalActual = ' ';
+        this.puertasAbiertas = false;
     }
 
     // ================= PASAJERO =================
 
-    public void subirTren(String pasajero, char terminalDestino) {
-        try {
-            // El pasajero se bloquea aquí si el tren no está en estación inicial o está
-            // lleno
-            permisoSubir.acquire();
-
-            mutex.acquire();
-            pasajeros++;
-            System.out.println(pasajero + " subió al Tren con destino a Terminal "
-                    + terminalDestino + ". Pasajeros: " + pasajeros + "/" + capacidad);
-            mutex.release();
-
-        } catch (InterruptedException e) {
-            System.out.println("ERROR al subir pasajero " + pasajero);
+    /**
+     * El pasajero espera hasta que las puertas estén abiertas Y haya lugar.
+     * Una vez que sube, libera un "lugar" notificando por si otro pasajero
+     * estaba esperando (no aplica aquí, pero es correcto para el monitor).
+     */
+    public synchronized void subirTren(String pasajero, char terminalDestino)
+            throws InterruptedException {
+        // Espera condición: puertas abiertas Y hay capacidad
+        while (!puertasAbiertas || pasajeros >= capacidad) {
+            this.wait();
         }
+        pasajeros++;
+        System.out.println(pasajero + " subió al Tren con destino a Terminal "
+                + terminalDestino + ". Pasajeros: " + pasajeros + "/" + capacidad);
     }
 
-    public void bajarTren(String pasajero, char terminalDestino) {
-        try {
-            synchronized (this) {
-                // Mientras no estemos en la terminal del pasajero, espera
-                while (terminalDestino != terminalActual) {
-                    this.wait();
-                }
-            }
-
-            mutex.acquire();
-            pasajeros--;
-            System.out.println(pasajero + " bajó en la Terminal " + terminalDestino
-                    + ". Pasajeros restantes: " + pasajeros);
-            mutex.release();
-
-        } catch (Exception e) {
-            System.out.println("ERROR al bajar pasajero " + pasajero);
+    /**
+     * El pasajero espera dentro del tren hasta llegar a su terminal.
+     * Al bajar decrementa el contador y notifica (puede liberar lugar para subir).
+     */
+    public synchronized void bajarTren(String pasajero, char terminalDestino)
+            throws InterruptedException {
+        // Espera condición: el tren está en la terminal del pasajero
+        while (terminalDestino != terminalActual) {
+            this.wait();
         }
+        pasajeros--;
+        System.out.println(pasajero + " bajó en la Terminal " + terminalDestino
+                + ". Pasajeros restantes: " + pasajeros);
+        this.notifyAll(); // por si ControlTren espera que el tren quede vacío
     }
 
     // ================= CONTROL DEL TREN =================
 
-    public void habilitarAcceso() {
-        terminalActual = ' '; // Reseteamos terminal
+    /**
+     * Abre puertas al inicio del recorrido: habilita el boarding.
+     */
+    public synchronized void habilitarAcceso() {
+        terminalActual  = ' ';
+        puertasAbiertas = true;
         System.out.println(MAGENTA + "=== EL TREN ABRE PUERTAS (Inicio de recorrido) ===" + RESET);
-
-        // Drenamos permisos viejos por seguridad y damos permisos nuevos según
-        // capacidad
-        permisoSubir.drainPermits();
-        permisoSubir.release(capacidad);
+        this.notifyAll(); // despierta pasajeros que esperaban para subir
     }
 
-    public void cerrarPuertas() {
+    /**
+     * Cierra puertas: ningún pasajero adicional puede subir.
+     */
+    public synchronized void cerrarPuertas() {
+        puertasAbiertas = false;
         System.out.println(MAGENTA + "=== EL TREN CIERRA PUERTAS ===" + RESET);
-        // Quitamos todos los permisos restantes para que nadie más suba
-        permisoSubir.drainPermits();
+        this.notifyAll(); // despierta eventuales hilos esperando en subirTren para que reevalúen
     }
 
-    public void iniciarRecorrido() {
+    public synchronized void iniciarRecorrido() {
         System.out.println(MAGENTA + "El Tren inició el recorrido hacia las terminales..." + RESET);
     }
 
+    /**
+     * El tren llega a una terminal: notifica a los pasajeros con ese destino.
+     */
     public synchronized void viajarATerminal(char terminal) {
         terminalActual = terminal;
         System.out.println(MAGENTA + ">> El Tren llegó a la Terminal " + terminal + RESET);
-        // Notificamos a todos los pasajeros que están esperando (wait) en bajarTren
-        this.notifyAll();
+        this.notifyAll(); // despierta a todos los que esperan en bajarTren
     }
 
-    public void finalizarRecorrido() {
-        terminalActual = ' ';
+    public synchronized void finalizarRecorrido() {
+        terminalActual  = ' ';
+        puertasAbiertas = false;
         System.out.println(MAGENTA + "El Tren finalizó el recorrido y vuelve al inicio" + RESET);
     }
 }

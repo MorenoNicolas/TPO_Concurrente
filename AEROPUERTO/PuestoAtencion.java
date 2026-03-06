@@ -5,10 +5,10 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class PuestoAtencion {
     private String aerolinea;
-    private int capacidad;                         // capacidad máxima
-    private int ocupacion;                         // ocupación actual
+    private int capacidad; // capacidad máxima
+    private int ocupacion; // ocupación actual
     private ConcurrentLinkedQueue<String> filaCheckIn; // fila de pasajeros en check-in
-    private ConcurrentLinkedQueue<String> hall;        // cola de espera (hall central)
+    private ConcurrentLinkedQueue<String> hall; // cola de espera (hall central)
     private ReentrantLock accesoPuesto;
     private Condition esperaFila;
     private Condition esperaGuardia;
@@ -67,7 +67,7 @@ public class PuestoAtencion {
             System.out.println(pasajero + " obtuvo el puesto de embarque: " + puestoAsignado);
             filaCheckIn.poll(); // lo saco de la fila
             ocupacion--;
-            esperaFila.signalAll();   // despierta al siguiente de la fila
+            esperaFila.signalAll(); // despierta al siguiente de la fila
             esperaGuardia.signalAll();// avisa al guardia
             return puestoAsignado;
         } finally {
